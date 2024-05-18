@@ -7,7 +7,14 @@ namespace StorageApp.Models
         public ApplicationDbContext(DbContextOptions options):base(options)
         {
         }
-
         public DbSet<Item> Items { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Price)
+                .HasColumnType("decimal(18, 2)");
+        }
+
     }
 }

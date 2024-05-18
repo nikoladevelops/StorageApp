@@ -1,7 +1,7 @@
 ﻿@model List<Item>
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "All Items";
 }
 
 <div>
@@ -12,13 +12,14 @@
     </div>
 </div>
 
-<button class="button btn-success mt-1 mb-1">Add Item</button>
+<a asp-action="Add" class="btn btn-success mt-1 mb-1">Add Item</a>
 <table class="table table-bordered table-striped">
     <thead>
-        <tr">
+        <tr>
             <th>Id</th>
             <th>Name</th>
             <th>Quantity</th>
+
             <th>Price</th>
             <th>Supplier</th>
             <th>Options</th>
@@ -34,8 +35,10 @@
             <td>@item.Price</td>
             <td>@item.Supplier</td>
             <td>
-                <button class="btn btn-warning">Edit</button>
-                <button class="btn btn-danger">Delete</button>
+                <form method="post" asp-action="Delete" asp-route-id="@item.Id">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
             </td>
         </tr>        }
     </tbody>
