@@ -1,4 +1,5 @@
-﻿@model List<Item>
+﻿@using StorageApp.Dtos.Items
+@model ItemsIndexDto
 
 @{
     ViewData["Title"] = "All Items";
@@ -7,8 +8,10 @@
 <div>
     <label for="search" class="h3">Search</label>
     <div class="d-flex align-items-center gap-2">
-        <input id="search" class="p-0 m-0" type="text" name="search" placeholder="Search..." value="" />
-        <button class="btn btn-info btn">Search</button>
+        <input id="searchInput" class="p-0 m-0" type="text" name="search" placeholder="Search..." value="@Model.SearchTerm" />
+        <input id="minPriceInput" placeholder="Min Price" value="@Model.MinPrice"/>
+        <input id="maxPriceInput" placeholder="Max Price" value="@Model.MaxPrice"/>
+        <a id="searchBtn" href="#" onclick="return searchBtnClick();" class="btn btn-info btn">Search</a>
     </div>
 </div>
 
@@ -26,7 +29,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.AllItems)
         {
         <tr>
             <td>@item.Id</td>
@@ -43,5 +46,75 @@
         </tr>        }
     </tbody>
 </table>
+
+@section Scripts{
+    <script defer>
+        // When the search button is clicked (in this case it's just an <a> element), override the .href, so that the link has the proper filter arguments
+        function searchBtnClick() {
+            let searchBtn = document.querySelector("#searchBtn");
+
+            let searchQuery = getSearchQuery();
+            if (searchQuery == "") 
+            { 
+                return false;
+            }
+
+            searchBtn.href = "/?" + getSearchQuery();
+
+            return true;
+        }
+
+        // Check if a string is null or whitespace
+        function isNullOrWhitespace(input) {
+            if (typeof input === 'undefined' || input == null) return true;
+
+            return input.replace(/\s/g, '').length < 1;
+        }
+
+        // Get the search query by combining the values of different html dom elements
+        function getSearchQuery()
+        {
+            let searchBtn = document.querySelector("#searchBtn");
+
+            let searchInput = document.querySelector("#searchInput");
+            let minPriceInput = document.querySelector("#minPriceInput");
+            let maxPriceInput = document.querySelector("#maxPriceInput");
+
+            let searchTerm = searchInput.value;
+            searchTerm = searchTerm.trim();
+
+            let minPrice = minPriceInput.value;
+            let maxPrice = maxPriceInput.value;
+
+            let searchQuery = "";
+            
+            if(!(isNullOrWhitespace(searchTerm)))
+            {
+                searchQuery+="&searchTerm="+searchTerm;
+            }
+
+            if (!(isNullOrWhitespace(minPrice))) {
+                searchQuery += "&minPrice=" + minPrice;
+            }
+
+            if (!(isNullOrWhitespace(maxPrice))) {
+                searchQuery += "&maxPrice=" + maxPrice;
+            }
+
+            return searchQuery;
+        }
+    </script>
+    <script defer>
+        window.onload=function(){
+            $("#searchInput").on('keyup', function (e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                document.querySelector("#searchBtn").click();
+            }
+        });
+        }
+    </script>
+
+
+}
 
 

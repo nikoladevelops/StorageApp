@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using StorageApp.Dtos.Items;
 using StorageApp.Models;
 using System.Diagnostics;
 
@@ -15,12 +16,30 @@ namespace StorageApp.Controllers
             _context = context;
         }
 
-        // Additional parameters for filtering
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string searchTerm="", decimal minPrice = 1, decimal maxPrice = 1000000)
         {
-            var allItems = _context.Items.ToList();
-            return View(allItems);
+            IQueryable<Item> currentQuery = _context.Items;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm)) 
+            {
+                searchTerm = searchTerm.Trim();
+                currentQuery = currentQuery.Where(i => i.Name.Contains(searchTerm));
+            }
+
+            currentQuery = currentQuery.Where(i => i.Price >= minPrice && i.Price <= maxPrice);
+
+            List<Item> allFilteredItems = currentQuery.ToList();
+
+            var dto = new ItemsIndexDto() 
+            {
+                AllItems = allFilteredItems,
+                SearchTerm = searchTerm,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice
+            };
+
+            return View(dto);
         }
 
         [HttpGet]
