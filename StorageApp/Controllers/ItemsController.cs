@@ -7,34 +7,44 @@ namespace StorageApp.Controllers
 {
     public class ItemsController : Controller
     {
-        private readonly ILogger<ItemsController> _logger;
         private readonly ApplicationDbContext _context;
 
-        public ItemsController(ILogger<ItemsController> logger, ApplicationDbContext context)
+        public ItemsController(ApplicationDbContext context)
         {
-            _logger = logger;
             _context = context;
         }
 
         [HttpGet]
-        public IActionResult Index(string searchTerm="", decimal minPrice = 1, decimal maxPrice = 1000000)
+        public IActionResult Index(string itemName="", string supplierName="", decimal minPrice = 1, decimal maxPrice = 1000000)
         {
+            // The idea is to keep adding filter statements to the query, before finally executing it by calling .ToList()
             IQueryable<Item> currentQuery = _context.Items;
 
-            if (!string.IsNullOrWhiteSpace(searchTerm)) 
+            // Filter by itemName
+            if (!string.IsNullOrWhiteSpace(itemName)) 
             {
-                searchTerm = searchTerm.Trim();
-                currentQuery = currentQuery.Where(i => i.Name.Contains(searchTerm));
+                itemName = itemName.Trim();
+                currentQuery = currentQuery.Where(i => i.Name.Contains(itemName));
+            }
+            // Filter by supplierName
+            if (!string.IsNullOrWhiteSpace(supplierName))
+            {
+                supplierName = supplierName.Trim();
+                currentQuery = currentQuery.Where(i => i.Supplier.Contains(supplierName));
             }
 
+            // Filter by price
             currentQuery = currentQuery.Where(i => i.Price >= minPrice && i.Price <= maxPrice);
 
+            // Get final result
             List<Item> allFilteredItems = currentQuery.ToList();
 
+            // Give a dto to the view, so that the search terms get remembered
             var dto = new ItemsIndexDto() 
             {
                 AllItems = allFilteredItems,
-                SearchTerm = searchTerm,
+                ItemName = itemName,
+                SupplierName = supplierName,
                 MinPrice = minPrice,
                 MaxPrice = maxPrice
             };

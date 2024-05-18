@@ -8,7 +8,8 @@
 <div>
     <label for="search" class="h3">Search</label>
     <div class="d-flex align-items-center gap-2">
-        <input id="searchInput" class="p-0 m-0" type="text" name="search" placeholder="Search..." value="@Model.SearchTerm" />
+        <input id="itemNameInput" class="p-0 m-0" type="text" placeholder="Item Name" value="@Model.ItemName" />
+        <input id="supplierNameInput" class="p-0 m-0" type="text" placeholder="Supplier Name" value="@Model.SupplierName" />
         <input id="minPriceInput" placeholder="Min Price" value="@Model.MinPrice"/>
         <input id="maxPriceInput" placeholder="Max Price" value="@Model.MaxPrice"/>
         <a id="searchBtn" href="#" onclick="return searchBtnClick();" class="btn btn-info btn">Search</a>
@@ -76,21 +77,28 @@
         {
             let searchBtn = document.querySelector("#searchBtn");
 
-            let searchInput = document.querySelector("#searchInput");
+            let itemNameInput = document.querySelector("#itemNameInput");
+            let supplierNameInput = document.querySelector("#supplierNameInput")
             let minPriceInput = document.querySelector("#minPriceInput");
             let maxPriceInput = document.querySelector("#maxPriceInput");
 
-            let searchTerm = searchInput.value;
-            searchTerm = searchTerm.trim();
+            let itemName = itemNameInput.value;
+            itemName = itemName.trim();
+
+            let supplierName = supplierNameInput.value;
+            supplierName = supplierName.trim();
 
             let minPrice = minPriceInput.value;
             let maxPrice = maxPriceInput.value;
 
             let searchQuery = "";
-            
-            if(!(isNullOrWhitespace(searchTerm)))
-            {
-                searchQuery+="&searchTerm="+searchTerm;
+
+            if (!(isNullOrWhitespace(itemName))) {
+                searchQuery += "&itemName=" + itemName;
+            }
+
+            if (!(isNullOrWhitespace(supplierName))) {
+                searchQuery += "&supplierName=" + supplierName;
             }
 
             if (!(isNullOrWhitespace(minPrice))) {
@@ -105,12 +113,38 @@
         }
     </script>
     <script defer>
-        window.onload=function(){
-            $("#searchInput").on('keyup', function (e) {
-            if (e.key === 'Enter' || e.keyCode === 13) {
-                document.querySelector("#searchBtn").click();
-            }
-        });
+        // Adds the ability of pressing the Enter key so that a search occurs when an input field is focused, without the need of using the mouse button
+        window.onload = function () {
+            let itemNameInput = document.querySelector("#itemNameInput");
+            let supplierNameInput = document.querySelector("#supplierNameInput")
+            let minPriceInput = document.querySelector("#minPriceInput");
+            let maxPriceInput = document.querySelector("#maxPriceInput");
+
+
+            itemNameInput.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    document.querySelector("#searchBtn").click();
+                }
+            });
+
+            supplierNameInput.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    document.querySelector("#searchBtn").click();
+                }
+            });
+
+            minPriceInput.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    document.querySelector("#searchBtn").click();
+                }
+            });
+
+            maxPriceInput.addEventListener('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    document.querySelector("#searchBtn").click();
+                }
+            });
+
         }
     </script>
 
