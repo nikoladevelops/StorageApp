@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "All Items";
+    //var serializeResult = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
 }
 
 <div>
@@ -17,6 +18,13 @@
 </div>
 
 <a asp-action="Add" class="btn btn-success mt-1 mb-1">Add Item</a>
+
+<form id="generateReportForm" asp-action="GenerateReport" method="post" class="d-inline">
+    <input type="hidden" value="@ViewData["jsonDto"]" name="dtoJson" />
+    <button type="submit" class="btn btn-success mt-1 mb-1">Generate Report</button>
+</form>
+@* <a asp-action="GenerateReport" asp-route-dto="@Model" class="btn btn-success mt-1 mb-1">Generate Report</a> *@
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -144,11 +152,8 @@
                     document.querySelector("#searchBtn").click();
                 }
             });
-
         }
     </script>
-
-
 }
 
 

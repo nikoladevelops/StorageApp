@@ -1,7 +1,16 @@
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.EMMA;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StorageApp.Dtos.Items;
 using StorageApp.Models;
+using StorageApp.Utility;
+using System.Data;
 using System.Diagnostics;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace StorageApp.Controllers
 {
@@ -15,13 +24,13 @@ namespace StorageApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(string itemName="", string supplierName="", decimal minPrice = 1, decimal maxPrice = 1000000)
+        public IActionResult Index(string itemName = "", string supplierName = "", decimal minPrice = 1, decimal maxPrice = 1000000)
         {
             // The idea is to keep adding filter statements to the query, before finally executing it by calling .ToList()
             IQueryable<Item> currentQuery = _context.Items;
 
             // Filter by itemName
-            if (!string.IsNullOrWhiteSpace(itemName)) 
+            if (!string.IsNullOrWhiteSpace(itemName))
             {
                 itemName = itemName.Trim();
                 currentQuery = currentQuery.Where(i => i.Name.Contains(itemName));
@@ -40,7 +49,7 @@ namespace StorageApp.Controllers
             List<Item> allFilteredItems = currentQuery.ToList();
 
             // Give a dto to the view, so that the search terms get remembered
-            var dto = new ItemsIndexDto() 
+            var dto = new ItemsIndexDto()
             {
                 AllItems = allFilteredItems,
                 ItemName = itemName,
@@ -49,7 +58,32 @@ namespace StorageApp.Controllers
                 MaxPrice = maxPrice
             };
 
+            // Have everything serialized, so that a report can easily be generated any time the user wishes
+            ViewData["jsonDto"] = JsonConvert.SerializeObject(dto);
+
             return View(dto);
+        }
+
+
+        /// <summary>
+        /// Generates a report file and returns it to the client
+        /// </summary>
+        /// <param name="dtoJson">The json that has to be deserialized to a ItemsIndexDto so that all information can be extracted that is needed for the report</param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult GenerateReport(string dtoJson)
+        {
+            ItemsIndexDto dto = JsonConvert.DeserializeObject<ItemsIndexDto>(dtoJson);
+
+            if (dto == null)
+            {
+                return RedirectToAction("Error");
+            }
+
+            DataTable info = ReportGenerator.GenerateInfoDataTable(dto);
+            DataTable report = ReportGenerator.GenerateReportDataTable(dto);
+
+            return ReportGenerator.GenerateExcelWorkbook(info, report);
         }
 
         [HttpGet]
