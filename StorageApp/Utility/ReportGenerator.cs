@@ -45,7 +45,7 @@ namespace StorageApp.Utility
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.Append("This is an auto report generated for ");
+            sb.Append("This is an auto generated report for ");
 
             var itemName = string.IsNullOrWhiteSpace(dto.ItemName) ? "[ALL] items" : $"[{dto.ItemName}] items";
             sb.Append(itemName);

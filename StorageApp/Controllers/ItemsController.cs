@@ -1,6 +1,7 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.EMMA;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StorageApp.Dtos.Items;
@@ -24,7 +25,7 @@ namespace StorageApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(string itemName = "", string supplierName = "", decimal minPrice = 1, decimal maxPrice = 1000000)
+        public async Task<IActionResult> Index(string itemName = "", string supplierName = "", decimal minPrice = 1, decimal maxPrice = 1000000)
         {
             // The idea is to keep adding filter statements to the query, before finally executing it by calling .ToList()
             IQueryable<Item> currentQuery = _context.Items;
@@ -46,7 +47,7 @@ namespace StorageApp.Controllers
             currentQuery = currentQuery.Where(i => i.Price >= minPrice && i.Price <= maxPrice);
 
             // Get final result
-            List<Item> allFilteredItems = currentQuery.ToList();
+            List<Item> allFilteredItems = await currentQuery.ToListAsync();
 
             // Give a dto to the view, so that the search terms get remembered
             var dto = new ItemsIndexDto()
@@ -64,7 +65,6 @@ namespace StorageApp.Controllers
             return View(dto);
         }
 
-
         /// <summary>
         /// Generates a report file and returns it to the client
         /// </summary>
@@ -73,7 +73,7 @@ namespace StorageApp.Controllers
         [HttpPost]
         public IActionResult GenerateReport(string dtoJson)
         {
-            ItemsIndexDto dto = JsonConvert.DeserializeObject<ItemsIndexDto>(dtoJson);
+            ItemsIndexDto? dto = JsonConvert.DeserializeObject<ItemsIndexDto>(dtoJson);
 
             if (dto == null)
             {
@@ -93,9 +93,9 @@ namespace StorageApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var item = _context.Items.FirstOrDefault(x => x.Id == id);
+            var item = await _context.Items.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null) 
             {
                 return RedirectToAction("Error");
@@ -106,20 +106,20 @@ namespace StorageApp.Controllers
 
 
         [HttpPost]
-        public IActionResult Create(Item newItem)
+        public async Task<IActionResult> Create(Item newItem)
         {
             if (!ModelState.IsValid) 
             {
                 return View("Add");
             }
 
-            _context.Items.Add(newItem);
-            _context.SaveChanges();
+            await _context.Items.AddAsync(newItem);
+            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult Update(Item newItem)
+        public async Task<IActionResult> Update(Item newItem)
         {
             if (!ModelState.IsValid)
             {
@@ -127,21 +127,21 @@ namespace StorageApp.Controllers
             }
 
             _context.Items.Update(newItem);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var item = _context.Items.FirstOrDefault(x => x.Id == id);
+            var item = await _context.Items.FirstOrDefaultAsync(x => x.Id == id);
             if (item == null) 
             {
                 return RedirectToAction("Error");
             }
             _context.Items.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
